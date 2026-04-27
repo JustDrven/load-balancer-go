@@ -1,0 +1,9 @@
+services:
+  mysql:
+    image: mysql
+    restart: always
+    ports:
+      - "3332:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: very_secret_password
+      MYSQL_DATABASE: loadbalancer

@@ -1,6 +1,7 @@
 {
-    "address": "127.0.0.1:334",
+    "address": "127.0.0.1:3332",
     "username": "root",
     "password": "very_secret_password",
-    "db": "loadbalancer"
+    "db": "loadbalancer",
+    "serviceType": "TEST"
 }

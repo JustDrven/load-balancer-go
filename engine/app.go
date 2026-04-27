@@ -21,14 +21,14 @@ func CreateApplication(cnf data.Config) {
 
 func GetApplication() data.Application {
 	if application == nil {
-		panic("The application isn't initialized")
+		panic("[APP-ENGINE] The application isn't initialized")
 	}
 
 	return *application
 }
 
 func Start() {
-	fmt.Printf("The application is listening at port %d\n", PORT)
+	fmt.Printf("[APP-ENGINE] The application is listening at port %d\n", PORT)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
 }
