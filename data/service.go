@@ -1,7 +1,5 @@
 package data
 
-import "gorm.io/gorm"
-
 type ServiceStatus int
 
 const (
@@ -10,9 +8,9 @@ const (
 )
 
 type Service struct {
-	gorm.Model
-
+	ID            uint `gorm:"primarykey"`
 	Type          string
+	SSL           bool
 	Address       string
 	MaxReferences int
 }
