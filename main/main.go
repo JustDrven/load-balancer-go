@@ -15,7 +15,7 @@ func main() {
 	engine.CreateApplication(*cnf)
 
 	db := manager.OrmInit(*cnf)
-	manager.SvcLoadServices(*db)
+	manager.SvcLoadServices(*db, engine.GetApplication().ServiceType)
 
 	engine.RegisterController()
 	engine.Start()
