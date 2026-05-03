@@ -1,4 +1,4 @@
-package data
+package api
 
 type ErrorResponse struct {
 	Error   bool   `json:"error"`

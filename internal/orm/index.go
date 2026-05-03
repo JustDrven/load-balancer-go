@@ -1,10 +1,11 @@
-package manager
+package orm
 
 import (
 	"fmt"
 	"time"
 
-	"dev.justdrven/loadbalancer/data"
+	"dev.justdrven/loadbalancer/internal/config"
+	"dev.justdrven/loadbalancer/internal/service"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -14,7 +15,7 @@ const (
 	TRANS_TIMEOUT             time.Duration = 5 * time.Second
 )
 
-func OrmInit(configData data.Config) *gorm.DB {
+func OrmInit(configData config.Config) *gorm.DB {
 	fmt.Println("[ORM-MANAGER] Initializing..")
 
 	connectinString := createConnectionString(configData)
@@ -27,13 +28,13 @@ func OrmInit(configData data.Config) *gorm.DB {
 	}
 
 	fmt.Println("[ORM-MANAGER] Starting configuration of DB")
-	db.AutoMigrate(&data.Service{})
+	db.AutoMigrate(&service.Service{})
 
 	fmt.Println("[ORM-MANAGER] Done")
 	return db
 }
 
-func createConnectionString(cnf data.Config) string {
+func createConnectionString(cnf config.Config) string {
 	addr := cnf.Address
 	username := cnf.Username
 	password := cnf.Password

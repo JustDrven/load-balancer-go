@@ -1,11 +1,4 @@
-package data
-
-type ServiceStatus int
-
-const (
-	Success ServiceStatus = iota
-	Failed
-)
+package service
 
 type Service struct {
 	ID            uint `gorm:"primarykey"`

@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 
-	"dev.justdrven/loadbalancer/data"
-	"dev.justdrven/loadbalancer/manager"
+	"dev.justdrven/loadbalancer/internal/application/api"
+	"dev.justdrven/loadbalancer/internal/service"
 )
 
 func RegisterController() {
@@ -17,24 +17,24 @@ func RegisterController() {
 }
 
 func middleware(res http.ResponseWriter, req *http.Request) {
-	service := manager.RefGetBestService()
-	if service == nil {
+	bestService := service.RefGetBestService()
+	if bestService == nil {
 		res.WriteHeader(http.StatusNotFound)
-		setResponseBody(res, data.ErrorResponse{
+		setResponseBody(res, api.ErrorResponse{
 			Error:   true,
 			Message: "The service is unavailable!",
 		})
 		return
 	}
 
-	manager.RefUse(service)
-	url := createURLToService(*service, *req)
+	service.RefUse(bestService)
+	url := createURLToService(*bestService, *req)
 
 	resp, err := sendRequest(url, *req)
 	if err != nil {
 
 		res.WriteHeader(http.StatusInternalServerError)
-		setResponseBody(res, data.ErrorResponse{
+		setResponseBody(res, api.ErrorResponse{
 			Error:   true,
 			Message: "The request failed",
 		})
@@ -52,7 +52,7 @@ func middleware(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(resp.StatusCode)
 	io.Copy(res, resp.Body)
 
-	manager.RefClose(service)
+	service.RefClose(bestService)
 }
 
 func sendRequest(addr string, oldReq http.Request) (*http.Response, error) {
@@ -85,7 +85,7 @@ func setResponseBody(newResponse http.ResponseWriter, responseBody any) {
 	jsonEncoder.Encode(responseBody)
 }
 
-func createURLToService(service data.ManagedService, req http.Request) string {
+func createURLToService(service service.ManagedService, req http.Request) string {
 	addr := service.Address
 	endpoint := req.URL.Path
 	query := req.URL.RawQuery

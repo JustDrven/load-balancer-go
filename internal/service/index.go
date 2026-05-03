@@ -1,28 +1,27 @@
-package manager
+package service
 
 import (
 	"fmt"
 
-	"dev.justdrven/loadbalancer/data"
-	"github.com/go-ping/ping"
+	"dev.justdrven/loadbalancer/pkg"
 	"gorm.io/gorm"
 )
 
-var services []*data.ManagedService
+var services []*ManagedService
 
-func SvcGetService() []*data.ManagedService {
+func SvcGetService() []*ManagedService {
 	return services
 }
 
 func SvcLoadServices(db gorm.DB, applicationType string) {
 
-	var fetchServices []data.Service
+	var fetchServices []Service
 
 	db.Find(&fetchServices).Where("type = ?", applicationType)
 	for i := range fetchServices {
 		dbService := fetchServices[i]
 
-		if makeDiagnostic(dbService.Address) == data.Failed {
+		if pkg.MakeDiagnostic(dbService.Address) == pkg.Failed {
 			continue
 		}
 
@@ -33,40 +32,26 @@ func SvcLoadServices(db gorm.DB, applicationType string) {
 	fmt.Printf("[SVC-MANAGER] Loaded %d services\n", len(services))
 
 }
-func makeDiagnostic(addr string) data.ServiceStatus {
-	pinger, err := ping.NewPinger(addr)
-	if err != nil {
-		return data.Failed
-	}
 
-	pinger.Count = 1
-	err = pinger.Run()
-	if err != nil {
-		return data.Failed
-	}
-
-	return data.Success
-}
-
-func mapToManagedService(service data.Service) *data.ManagedService {
+func mapToManagedService(service Service) *ManagedService {
 	addr := createAddressService(service)
 	maxReferences := service.MaxReferences
 
-	return &data.ManagedService{
+	return &ManagedService{
 		Address:       addr,
 		MaxReferences: maxReferences,
 		References:    0,
 	}
 }
 
-func createAddressService(service data.Service) string {
+func createAddressService(service Service) string {
 	addr := service.Address
 	schema := extractSchema(service)
 
 	return fmt.Sprintf("%s://%s", schema, addr)
 }
 
-func extractSchema(service data.Service) string {
+func extractSchema(service Service) string {
 	var schema string
 	if service.SSL {
 		schema = "https"
@@ -77,12 +62,12 @@ func extractSchema(service data.Service) string {
 	return schema
 }
 
-func saveService(service *data.ManagedService) {
+func saveService(service *ManagedService) {
 	services = append(services, service)
 }
 
-func RefGetBestService() *data.ManagedService {
-	var bestService *data.ManagedService
+func RefGetBestService() *ManagedService {
+	var bestService *ManagedService
 	services := SvcGetService()
 
 	for i := range services {
@@ -101,7 +86,7 @@ func RefGetBestService() *data.ManagedService {
 
 }
 
-func RefClose(service *data.ManagedService) {
+func RefClose(service *ManagedService) {
 	if service.References <= 0 {
 		return
 	}
@@ -109,7 +94,7 @@ func RefClose(service *data.ManagedService) {
 	service.References--
 }
 
-func RefUse(service *data.ManagedService) {
+func RefUse(service *ManagedService) {
 	if service.References >= service.MaxReferences {
 		return
 	}
@@ -118,7 +103,7 @@ func RefUse(service *data.ManagedService) {
 
 }
 
-func isBest(service *data.ManagedService) bool {
+func isBest(service *ManagedService) bool {
 
 	if service.References < service.MaxReferences {
 		return true
