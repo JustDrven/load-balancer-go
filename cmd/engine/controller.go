@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"dev.justdrven/loadbalancer/internal/application/api"
+	"dev.justdrven/loadbalancer/internal/reference"
 	"dev.justdrven/loadbalancer/internal/service"
 )
 
@@ -27,7 +28,7 @@ func middleware(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	service.RefUse(bestService)
+	reference.Use(bestService)
 	url := createURLToService(*bestService, *req)
 
 	resp, err := sendRequest(url, *req)
@@ -52,7 +53,7 @@ func middleware(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(resp.StatusCode)
 	io.Copy(res, resp.Body)
 
-	service.RefClose(bestService)
+	reference.Close(bestService)
 }
 
 func sendRequest(addr string, oldReq http.Request) (*http.Response, error) {
