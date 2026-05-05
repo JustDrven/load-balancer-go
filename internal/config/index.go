@@ -7,7 +7,7 @@ import (
 	"dev.justdrven/loadbalancer/pkg"
 )
 
-func CCreateConfig() (error, *Config) {
+func CreateConfig() (error, *Config) {
 	bytes, err := os.ReadFile(pkg.CONFIG_FILE)
 	if err != nil {
 		return err, nil

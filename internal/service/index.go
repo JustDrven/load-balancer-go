@@ -9,11 +9,11 @@ import (
 
 var services []*ManagedService
 
-func SvcGetService() []*ManagedService {
+func GetService() []*ManagedService {
 	return services
 }
 
-func SvcLoadServices(db gorm.DB, applicationType string) {
+func LoadServices(db *gorm.DB, applicationType string) {
 
 	var fetchServices []Service
 
@@ -68,12 +68,12 @@ func saveService(service *ManagedService) {
 
 func RefGetBestService() *ManagedService {
 	var bestService *ManagedService
-	services := SvcGetService()
+	services := GetService()
 
 	for i := range services {
 		service := services[i]
 
-		if !isBest(service) {
+		if !IsBest(service.References, service.MaxReferences) {
 			continue
 		}
 
@@ -86,26 +86,8 @@ func RefGetBestService() *ManagedService {
 
 }
 
-func RefClose(service *ManagedService) {
-	if service.References <= 0 {
-		return
-	}
-
-	service.References--
-}
-
-func RefUse(service *ManagedService) {
-	if service.References >= service.MaxReferences {
-		return
-	}
-
-	service.References++
-
-}
-
-func isBest(service *ManagedService) bool {
-
-	if service.References < service.MaxReferences {
+func IsBest(references int, maxReferences int) bool {
+	if references < maxReferences {
 		return true
 	}
 
